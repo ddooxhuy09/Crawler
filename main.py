@@ -12,6 +12,9 @@ from PyQt6.QtGui import QFont, QIcon
 # Import các module crawl
 from crawl_tiktok import open_tiktok_search
 from crawl_youtube import YouTubeViewCrawler
+from crawl_aliexpress import capture_aliexpress_api
+from crawl_instagram import open_instagram_search
+from crawl_temu import open_temu
 
 
 class CrawlThread(QThread):
@@ -66,6 +69,57 @@ class CrawlThread(QThread):
                 else:
                     self.finished_signal.emit(False, "Không tìm thấy videos nào")
                     
+            elif self.crawl_type == "aliexpress":
+                self.progress_signal.emit("Đang khởi tạo AliExpress crawler...")
+                # Chạy AliExpress crawler (không cần keyword)
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(capture_aliexpress_api())
+                loop.close()
+                
+                self.progress_signal.emit("AliExpress crawler đã hoàn thành!")
+                self.finished_signal.emit(True, "Hoàn thành crawl AliExpress! Kiểm tra console để xem kết quả.")
+                
+            elif self.crawl_type == "instagram":
+                self.progress_signal.emit("Đang khởi tạo Instagram crawler...")
+                # Chạy Instagram crawler (cần keyword)
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(open_instagram_search(self.keyword))
+                loop.close()
+                
+                # Kiểm tra file CSV được tạo
+                csv_files = [f for f in os.listdir('.') if f.startswith('instagram_search_') and f.endswith('.csv')]
+                if csv_files:
+                    # Di chuyển file CSV đến thư mục đã chọn
+                    csv_file = csv_files[0]
+                    new_path = os.path.join(self.save_path, csv_file)
+                    os.rename(csv_file, new_path)
+                    self.progress_signal.emit(f"Đã lưu file CSV tại: {new_path}")
+                    self.finished_signal.emit(True, f"Hoàn thành crawl Instagram! File: {new_path}")
+                else:
+                    self.finished_signal.emit(False, "Không tìm thấy file CSV được tạo")
+                    
+            elif self.crawl_type == "temu":
+                self.progress_signal.emit("Đang khởi tạo Temu crawler...")
+                # Chạy Temu crawler
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(open_temu())
+                loop.close()
+                
+                # Kiểm tra file CSV được tạo
+                csv_files = [f for f in os.listdir('.') if f.startswith('temu_') and f.endswith('.csv')]
+                if csv_files:
+                    # Di chuyển file CSV đến thư mục đã chọn
+                    csv_file = csv_files[0]
+                    new_path = os.path.join(self.save_path, csv_file)
+                    os.rename(csv_file, new_path)
+                    self.progress_signal.emit(f"Đã lưu file CSV tại: {new_path}")
+                    self.finished_signal.emit(True, f"Hoàn thành crawl Temu! File: {new_path}")
+                else:
+                    self.finished_signal.emit(False, "Không tìm thấy file CSV được tạo")
+                    
         except Exception as e:
             self.finished_signal.emit(False, f"Lỗi: {str(e)}")
 
@@ -73,7 +127,7 @@ class CrawlThread(QThread):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Social Media Crawler - TikTok & YouTube")
+        self.setWindowTitle("Social Media Crawler - TikTok, YouTube, AliExpress, Instagram, Temu")
         self.setGeometry(100, 100, 800, 600)
         
         # Biến lưu trữ
@@ -100,18 +154,27 @@ class MainWindow(QMainWindow):
         title_label.setStyleSheet("color: #2c3e50; margin-bottom: 20px;")
         main_layout.addWidget(title_label)
         
+        # Subtitle
+        subtitle_label = QLabel("TikTok • YouTube • AliExpress • Instagram • Temu")
+        subtitle_label.setFont(QFont("Arial", 12))
+        subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        subtitle_label.setStyleSheet("color: #7f8c8d; margin-bottom: 20px;")
+        main_layout.addWidget(subtitle_label)
+        
         # Group chọn loại crawl
         crawl_group = QGroupBox("Chọn loại crawl")
         crawl_group.setFont(QFont("Arial", 12, QFont.Weight.Bold))
         crawl_layout = QVBoxLayout(crawl_group)
         
-        # Layout cho 2 button
-        button_layout = QHBoxLayout()
+        # Layout cho các button - sử dụng GridLayout để sắp xếp 5 button
+        button_grid = QGridLayout()
+        button_grid.setSpacing(15)
         
         # Button TikTok
-        self.tiktok_btn = QPushButton("TikTok Crawler")
-        self.tiktok_btn.setFont(QFont("Arial", 14))
-        self.tiktok_btn.setMinimumHeight(60)
+        self.tiktok_btn = QPushButton("TikTok\nCrawler")
+        self.tiktok_btn.setFont(QFont("Arial", 12))
+        self.tiktok_btn.setMinimumHeight(80)
+        self.tiktok_btn.setMinimumWidth(150)
         self.tiktok_btn.setStyleSheet("""
             QPushButton {
                 background-color: #ff0050;
@@ -130,9 +193,10 @@ class MainWindow(QMainWindow):
         self.tiktok_btn.clicked.connect(lambda: self.select_crawl_type("tiktok"))
         
         # Button YouTube
-        self.youtube_btn = QPushButton("YouTube Crawler")
-        self.youtube_btn.setFont(QFont("Arial", 14))
-        self.youtube_btn.setMinimumHeight(60)
+        self.youtube_btn = QPushButton("YouTube\nCrawler")
+        self.youtube_btn.setFont(QFont("Arial", 12))
+        self.youtube_btn.setMinimumHeight(80)
+        self.youtube_btn.setMinimumWidth(150)
         self.youtube_btn.setStyleSheet("""
             QPushButton {
                 background-color: #ff0000;
@@ -150,9 +214,79 @@ class MainWindow(QMainWindow):
         """)
         self.youtube_btn.clicked.connect(lambda: self.select_crawl_type("youtube"))
         
-        button_layout.addWidget(self.tiktok_btn)
-        button_layout.addWidget(self.youtube_btn)
-        crawl_layout.addLayout(button_layout)
+        # Button AliExpress
+        self.aliexpress_btn = QPushButton("AliExpress\nCrawler")
+        self.aliexpress_btn.setFont(QFont("Arial", 12))
+        self.aliexpress_btn.setMinimumHeight(80)
+        self.aliexpress_btn.setMinimumWidth(150)
+        self.aliexpress_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #ff6600;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #e65c00;
+            }
+            QPushButton:pressed {
+                background-color: #cc5200;
+            }
+        """)
+        self.aliexpress_btn.clicked.connect(lambda: self.select_crawl_type("aliexpress"))
+        
+        # Button Instagram
+        self.instagram_btn = QPushButton("Instagram\nCrawler")
+        self.instagram_btn.setFont(QFont("Arial", 12))
+        self.instagram_btn.setMinimumHeight(80)
+        self.instagram_btn.setMinimumWidth(150)
+        self.instagram_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #f09433, stop:1 #e6683c, stop:2 #dc2743, stop:3 #cc2366, stop:4 #bc1888);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #e0852a, stop:1 #d55f33, stop:2 #cb1e3a, stop:3 #bb1a5d, stop:4 #ab177f);
+            }
+        """)
+        self.instagram_btn.clicked.connect(lambda: self.select_crawl_type("instagram"))
+        
+        # Button Temu
+        self.temu_btn = QPushButton("Temu\nCrawler")
+        self.temu_btn.setFont(QFont("Arial", 12))
+        self.temu_btn.setMinimumHeight(80)
+        self.temu_btn.setMinimumWidth(150)
+        self.temu_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #ff6b35;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #e65a2a;
+            }
+            QPushButton:pressed {
+                background-color: #cc4f25;
+            }
+        """)
+        self.temu_btn.clicked.connect(lambda: self.select_crawl_type("temu"))
+        
+        # Sắp xếp các button vào grid (2 hàng, 3 cột)
+        button_grid.addWidget(self.tiktok_btn, 0, 0)
+        button_grid.addWidget(self.youtube_btn, 0, 1)
+        button_grid.addWidget(self.aliexpress_btn, 0, 2)
+        button_grid.addWidget(self.instagram_btn, 1, 0)
+        button_grid.addWidget(self.temu_btn, 1, 1)
+        
+        crawl_layout.addLayout(button_grid)
         
         # Label hiển thị chế độ đang chọn
         self.mode_label = QLabel("Chưa chọn chế độ crawl")
@@ -173,10 +307,10 @@ class MainWindow(QMainWindow):
         
         main_layout.addWidget(crawl_group)
         
-        # Group nhập keyword
-        keyword_group = QGroupBox("Nhập keyword")
-        keyword_group.setFont(QFont("Arial", 12, QFont.Weight.Bold))
-        keyword_layout = QVBoxLayout(keyword_group)
+        # Group nhập keyword (chỉ hiển thị cho TikTok, YouTube và Temu)
+        self.keyword_group = QGroupBox("Nhập keyword")
+        self.keyword_group.setFont(QFont("Arial", 12, QFont.Weight.Bold))
+        keyword_layout = QVBoxLayout(self.keyword_group)
         
         self.keyword_input = QLineEdit()
         self.keyword_input.setPlaceholderText("Nhập từ khóa tìm kiếm...")
@@ -194,7 +328,10 @@ class MainWindow(QMainWindow):
             }
         """)
         keyword_layout.addWidget(self.keyword_input)
-        main_layout.addWidget(keyword_group)
+        main_layout.addWidget(self.keyword_group)
+        
+        # Ẩn keyword group ban đầu
+        self.keyword_group.setVisible(False)
         
         # Group chọn nơi lưu
         save_group = QGroupBox("Chọn nơi lưu file CSV")
@@ -290,10 +427,10 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Sẵn sàng")
         
     def select_crawl_type(self, crawl_type):
-        """Chọn loại crawl (TikTok hoặc YouTube)"""
+        """Chọn loại crawl (TikTok, YouTube, AliExpress, Instagram, Temu)"""
         self.current_crawl_type = crawl_type
         
-        # Reset style cho cả 2 button
+        # Reset style cho tất cả button
         self.tiktok_btn.setStyleSheet("""
             QPushButton {
                 background-color: #ff0050;
@@ -320,7 +457,48 @@ class MainWindow(QMainWindow):
             }
         """)
         
-        # Highlight button được chọn
+        self.aliexpress_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #ff6600;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #e65c00;
+            }
+        """)
+        
+        self.instagram_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #f09433, stop:1 #e6683c, stop:2 #dc2743, stop:3 #cc2366, stop:4 #bc1888);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #e0852a, stop:1 #d55f33, stop:2 #cb1e3a, stop:3 #bb1a5d, stop:4 #ab177f);
+            }
+        """)
+        
+        self.temu_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #ff6b35;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #e65a2a;
+            }
+        """)
+        
+        # Highlight button được chọn và xử lý logic
         if crawl_type == "tiktok":
             self.tiktok_btn.setStyleSheet("""
                 QPushButton {
@@ -345,7 +523,9 @@ class MainWindow(QMainWindow):
             """)
             self.log_text.append(f"🎯 Đã chọn chế độ: TikTok Crawler")
             self.statusBar().showMessage("Chế độ TikTok - Sẵn sàng nhập keyword")
-        else:
+            self.keyword_group.setVisible(True)  # Hiển thị keyword group
+            
+        elif crawl_type == "youtube":
             self.youtube_btn.setStyleSheet("""
                 QPushButton {
                     background-color: #e60000;
@@ -369,6 +549,87 @@ class MainWindow(QMainWindow):
             """)
             self.log_text.append(f"🎯 Đã chọn chế độ: YouTube Crawler")
             self.statusBar().showMessage("Chế độ YouTube - Sẵn sàng nhập keyword")
+            self.keyword_group.setVisible(True)  # Hiển thị keyword group
+            
+        elif crawl_type == "temu":
+            self.temu_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #e65a2a;
+                    color: white;
+                    border: 3px solid #ff6b35;
+                    border-radius: 10px;
+                    font-weight: bold;
+                }
+            """)
+            self.mode_label.setText("🎯 Chế độ crawl: Temu")
+            self.mode_label.setStyleSheet("""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #ff6b35;
+                    border: 2px solid #ff6b35;
+                    border-radius: 8px;
+                    padding: 8px;
+                    font-weight: bold;
+                    font-style: normal;
+                }
+            """)
+            self.log_text.append(f"🎯 Đã chọn chế độ: Temu Crawler")
+            self.statusBar().showMessage("Chế độ Temu - Không cần keyword")
+            self.keyword_group.setVisible(False)  # Ẩn keyword group
+            
+        elif crawl_type == "aliexpress":
+            self.aliexpress_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #e65c00;
+                    color: white;
+                    border: 3px solid #ff6600;
+                    border-radius: 10px;
+                    font-weight: bold;
+                }
+            """)
+            self.mode_label.setText("🎯 Chế độ crawl: AliExpress")
+            self.mode_label.setStyleSheet("""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #ff6600;
+                    border: 2px solid #ff6600;
+                    border-radius: 8px;
+                    padding: 8px;
+                    font-weight: bold;
+                    font-style: normal;
+                }
+            """)
+            self.log_text.append(f"🎯 Đã chọn chế độ: AliExpress Crawler")
+            self.statusBar().showMessage("Chế độ AliExpress - Không cần keyword")
+            self.keyword_group.setVisible(False)  # Ẩn keyword group
+            
+        elif crawl_type == "instagram":
+            self.instagram_btn.setStyleSheet("""
+                QPushButton {
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                        stop:0 #d55f33, stop:1 #cb1e3a, stop:2 #bb1a5d, stop:3 #ab177f);
+                    color: white;
+                    border: 3px solid #e0852a;
+                    border-radius: 10px;
+                    font-weight: bold;
+                }
+            """)
+            self.mode_label.setText("🎯 Chế độ crawl: Instagram")
+            self.mode_label.setStyleSheet("""
+                QLabel {
+                    color: #ffffff;
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                        stop:0 #d55f33, stop:1 #cb1e3a, stop:2 #bb1a5d, stop:3 #ab177f);
+                    border: 2px solid #d55f33;
+                    border-radius: 8px;
+                    padding: 8px;
+                    font-weight: bold;
+                    font-style: normal;
+                }
+            """)
+            self.log_text.append(f"🎯 Đã chọn chế độ: Instagram Crawler")
+            self.statusBar().showMessage("Chế độ Instagram - Sẵn sàng nhập keyword")
+            self.keyword_group.setVisible(True)  # Hiển thị keyword group
         
         # Kiểm tra trạng thái sẵn sàng
         self.check_ready_state()
@@ -385,37 +646,49 @@ class MainWindow(QMainWindow):
             
     def check_ready_state(self):
         """Kiểm tra xem có thể bắt đầu crawl không"""
-        can_start = (bool(self.current_crawl_type) and 
-                    bool(self.keyword_input.text().strip()) and 
-                    bool(self.save_path))
+        # AliExpress và Temu không cần keyword
+        if self.current_crawl_type in ["aliexpress", "temu"]:
+            can_start = (bool(self.current_crawl_type) and bool(self.save_path))
+        else:
+            # TikTok, YouTube, Instagram cần keyword
+            can_start = (bool(self.current_crawl_type) and 
+                        bool(self.keyword_input.text().strip()) and 
+                        bool(self.save_path))
         
         self.crawl_btn.setEnabled(can_start)
         
         if can_start:
             self.statusBar().showMessage("Sẵn sàng crawl")
         else:
-            self.statusBar().showMessage("Vui lòng hoàn thành tất cả bước")
+            if self.current_crawl_type in ["aliexpress", "temu"]:
+                self.statusBar().showMessage("Vui lòng chọn nơi lưu file")
+            else:
+                self.statusBar().showMessage("Vui lòng hoàn thành tất cả bước")
             
     def start_crawl(self):
         """Bắt đầu crawl"""
-        keyword = self.keyword_input.text().strip()
-        
-        if not keyword:
-            QMessageBox.warning(self, "Lỗi", "Vui lòng nhập keyword!")
-            return
+        # Kiểm tra keyword chỉ cho TikTok, YouTube, Instagram
+        if self.current_crawl_type in ["tiktok", "youtube", "instagram"]:
+            keyword = self.keyword_input.text().strip()
+            if not keyword:
+                QMessageBox.warning(self, "Lỗi", "Vui lòng nhập keyword!")
+                return
             
         if not self.save_path:
             QMessageBox.warning(self, "Lỗi", "Vui lòng chọn nơi lưu file!")
             return
             
         if not self.current_crawl_type:
-            QMessageBox.warning(self, "Lỗi", "Vui lòng chọn loại crawl (TikTok hoặc YouTube)!")
+            QMessageBox.warning(self, "Lỗi", "Vui lòng chọn loại crawl!")
             return
             
         # Disable UI
         self.crawl_btn.setEnabled(False)
         self.tiktok_btn.setEnabled(False)
         self.youtube_btn.setEnabled(False)
+        self.aliexpress_btn.setEnabled(False)
+        self.instagram_btn.setEnabled(False)
+        self.temu_btn.setEnabled(False)
         self.keyword_input.setEnabled(False)
         self.browse_btn.setEnabled(False)
         
@@ -424,14 +697,18 @@ class MainWindow(QMainWindow):
         self.progress_bar.setRange(0, 0)  # Indeterminate progress
         
         # Log
-        crawl_type_name = "TIKTOK" if self.current_crawl_type == "tiktok" else "YOUTUBE"
+        crawl_type_name = self.current_crawl_type.upper()
         self.log_text.append(f"\n=== Bắt đầu crawl {crawl_type_name} ===")
         self.log_text.append(f"Chế độ: {crawl_type_name}")
-        self.log_text.append(f"Keyword: {keyword}")
+        if self.current_crawl_type in ["tiktok", "youtube", "instagram"]:
+            self.log_text.append(f"Keyword: {self.keyword_input.text().strip()}")
+        else:
+            self.log_text.append("Không cần keyword")
         self.log_text.append(f"Nơi lưu: {self.save_path}")
         self.log_text.append("Đang xử lý...")
         
         # Tạo và chạy thread crawl
+        keyword = self.keyword_input.text().strip() if self.current_crawl_type in ["tiktok", "youtube", "instagram"] else ""
         self.crawl_thread = CrawlThread(self.current_crawl_type, keyword, self.save_path)
         self.crawl_thread.progress_signal.connect(self.update_progress)
         self.crawl_thread.finished_signal.connect(self.crawl_finished)
@@ -459,6 +736,9 @@ class MainWindow(QMainWindow):
         self.crawl_btn.setEnabled(True)
         self.tiktok_btn.setEnabled(True)
         self.youtube_btn.setEnabled(True)
+        self.aliexpress_btn.setEnabled(True)
+        self.instagram_btn.setEnabled(True)
+        self.temu_btn.setEnabled(True)
         self.keyword_input.setEnabled(True)
         self.browse_btn.setEnabled(True)
         

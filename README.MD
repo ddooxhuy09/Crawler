@@ -1,6 +1,6 @@
 # 🚀 TikTok & YouTube Crawler
 
-Ứng dụng crawl dữ liệu từ TikTok và YouTube với giao diện PyQt6, tự động lưu vào file CSV.
+Ứng dụng crawl dữ liệu từ TikTok, YouTube, Temu, AliExpress và Instagram với giao diện PyQt6, tự động lưu vào file CSV.
 
 ## ✨ Tính năng
 
@@ -18,9 +18,30 @@
 - Thu thập thông tin: video details, statistics, channel info
 - Lưu dữ liệu vào file CSV với tên động
 
+### Temu Crawler
+- Sử dụng undetected-playwright để tránh bị detect
+- Tự động mở trang Temu và theo dõi network requests
+- Bắt API calls khi cuộn trang và click "See more"
+- Thu thập thông tin sản phẩm: URL, giá, đánh giá, số lượng comment
+- Lưu dữ liệu vào file `products_temu.csv`
+
+### AliExpress Crawler
+- Mở trang chính AliExpress và chờ người dùng nhập keyword
+- Tự động phát hiện khi chuyển sang trang search
+- Bắt API calls và headers từ network requests
+- Thu thập dữ liệu từ 10 trang đầu tiên (tối đa 50 sản phẩm)
+- Lưu thông tin: productId, URL, giá gốc, giá sale, discount, rating, title
+
+### Instagram Crawler
+- Sử dụng cookies rotation từ thư mục `cookies_instagram`
+- Tự động chọn random cookie file để tránh bị block
+- Bắt API calls từ Instagram search endpoint
+- Thu thập thông tin: URL post, thời gian tạo, like count, comment count, username, caption
+- Giới hạn thu thập 50 items và tự động dừng
+
 ### GUI Application
 - Giao diện PyQt6 thân thiện
-- Chọn mode crawl (TikTok/YouTube)
+- Chọn mode crawl (TikTok/YouTube/Temu/AliExpress/Instagram)
 - Nhập keyword tìm kiếm
 - Chọn vị trí lưu file
 - Theo dõi tiến trình crawl
@@ -88,7 +109,14 @@ python main.py
 ├── main.py              # GUI application chính
 ├── crawl_tiktok.py      # TikTok crawler
 ├── crawl_youtube.py     # YouTube crawler  
+├── crawl_temu.py        # Temu crawler
+├── crawl_aliexpress.py  # AliExpress crawler
+├── crawl_instagram.py   # Instagram crawler
 ├── api.json            # YouTube API keys
+├── cookies_instagram/  # Thư mục chứa cookies Instagram
+│   ├── cookie_1.json
+│   ├── cookie_2.json
+│   └── ...
 ├── requirements.txt    # Python dependencies
 └── README.MD          # Hướng dẫn này
 ```
@@ -103,6 +131,18 @@ python main.py
 - `youtube_videos_{keyword}.csv`
 - Cột: video_id, title, description, channel_title, published_at, thumbnail_url, view_count, like_count, comment_count, url
 
+### Temu CSV
+- `products_temu.csv`
+- Cột: url, price, market_price, currency, sales_tip, goods_score, comment_num_tips
+
+### AliExpress CSV
+- `product_aliexpress.csv`
+- Cột: productId, url, priceOriginal, salePrice, discount, tradeDesc, starRating, title
+
+### Instagram CSV
+- `instagram_search_{keyword}.csv`
+- Cột: url, created_at, like_count, comment_count, username, caption
+
 ## ⚙️ Cấu hình
 
 ### TikTok Crawler
@@ -114,6 +154,23 @@ python main.py
 - Số kết quả tối đa: 50 videos
 - Tự động rotation API keys
 - Retry logic khi gặp lỗi
+
+### Temu Crawler
+- Sử dụng undetected-playwright với anti-detection
+- Tự động cuộn trang và click "See more" 3 lần
+- Bắt API calls với offset để lấy dữ liệu phân trang
+
+### AliExpress Crawler
+- Mở trang chính và chờ người dùng nhập keyword
+- Tự động phát hiện trang search và reload
+- Thu thập dữ liệu từ 10 trang đầu tiên
+- Sử dụng session với cookies và headers từ API calls
+
+### Instagram Crawler
+- Rotation cookies từ thư mục `cookies_instagram`
+- Random chọn cookie file để tránh bị block
+- Giới hạn thu thập: 50 items
+- Tự động cuộn trang để lấy thêm dữ liệu
 
 ## 🔧 Troubleshooting
 
@@ -132,9 +189,27 @@ playwright install --force
 - Thử lại với keyword khác
 - Tăng thời gian chờ trong code nếu cần
 
+### Lỗi Temu crawl
+- Kiểm tra kết nối internet
+- Thử lại với keyword khác
+- Đảm bảo Playwright đã được cài đặt đúng cách
+
+### Lỗi AliExpress crawl
+- Kiểm tra kết nối internet
+- Đảm bảo đã nhập keyword và chuyển sang trang search
+- Kiểm tra console để xem API calls có được bắt không
+
+### Lỗi Instagram crawl
+- Kiểm tra thư mục `cookies_instagram` có chứa cookie files
+- Đảm bảo cookies còn hạn sử dụng
+- Thử lại với cookie khác nếu bị block
+
 ## 📝 Ghi chú
 
 - TikTok crawler sử dụng undetected-playwright để tránh bị detect
 - YouTube crawler tự động chuyển API key khi gặp lỗi
+- Temu crawler bắt API calls trong quá trình cuộn trang
+- AliExpress crawler sử dụng session với cookies và headers từ network requests
+- Instagram crawler sử dụng rotation cookies để tránh bị block
 - Dữ liệu được append vào CSV nếu file đã tồn tại
 - GUI chạy crawl trong background thread để không bị freeze
