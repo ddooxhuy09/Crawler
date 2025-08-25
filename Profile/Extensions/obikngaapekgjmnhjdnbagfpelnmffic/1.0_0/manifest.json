@@ -1,0 +1,21 @@
+{
+   "action": {
+      "default_icon": "icons/icon.png",
+      "default_popup": "popup.html"
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "description": "Click any DOM Element at regular intervals.",
+   "icons": {
+      "128": "icons/icon.png",
+      "16": "icons/icon.png",
+      "48": "icons/icon.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmdjmgKILpgN/pxCwc1Hv8lQptQXxVe+MSSC8pN7MCa4iiln/8A4ks844MSMEC4XX26QmwI5DQ2AJqkPEEKHFrCJoqpOt8ZKDPlPuLYxzTogkLdg2N5lToONJUXZYagVRpKDYMQrv495rAcY1hQOrgjxtxHbHuB0AYnI0b/9mxpfcKgVjr3xGabXrguZUG+H9czFBeESSxE0KXAEub1NQ93sSniecs4UOe/SPCxYzuYxvtLWltBn8GIxQctXYLJAMDL+PvE5MAkxA8gC5kBvvX4I4tzrZtN9lii9PdyJVF7r7CzAs/VVoH8aekU/p3sjyS5yzLNPZvAt5g9gIzCyspQIDAQAB",
+   "manifest_version": 3,
+   "name": "Auto Clicker Pro",
+   "permissions": [ "storage", "tabs", "scripting", "activeTab" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.0"
+}

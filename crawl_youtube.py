@@ -217,6 +217,18 @@ class YouTubeViewCrawler:
             if video_id in details_map:
                 statistics = details_map[video_id].get('statistics', {})
             
+            # Select best available thumbnail url
+            thumbs = snippet.get('thumbnails', {})
+            thumb_url = (
+                thumbs.get('maxres', {}).get('url') or
+                thumbs.get('standard', {}).get('url') or
+                thumbs.get('high', {}).get('url') or
+                thumbs.get('medium', {}).get('url') or
+                thumbs.get('default', {}).get('url') or
+                ''
+            )
+            
+            
             # Prepare row data
             row_data = {
                 'video_id': video_id,
@@ -224,7 +236,7 @@ class YouTubeViewCrawler:
                 'description': snippet.get('description', ''),
                 'channel_title': snippet.get('channelTitle', ''),
                 'published_at': snippet.get('publishedAt', ''),
-                'thumbnail_url': snippet.get('thumbnails', {}).get('high', {}).get('url', ''),
+                'thumbnail_url': thumb_url,
                 'view_count': statistics.get('viewCount', '0'),
                 'like_count': statistics.get('likeCount', '0'),
                 'comment_count': statistics.get('commentCount', '0'),

@@ -1,0 +1,38 @@
+{
+   "action": {
+      "default_icon": "img/icon-196.png",
+      "default_popup": "popup.html"
+   },
+   "background": {
+      "service_worker": "service-worker-loader.js",
+      "type": "module"
+   },
+   "content_scripts": [ {
+      "css": [ "assets/index.js.b4ce11ee.css", "assets/tailwind.dist.40003274.css" ],
+      "js": [ "assets/content-script-loader.chunk-f8f52f07.78d52e41.js", "assets/content-script-loader.chunk-2f7c72bb.2a04ec69.js" ],
+      "matches": [ "*://*.pinterest.at/*", "*://*.pinterest.ca/*", "*://*.pinterest.ch/*", "*://*.pinterest.co.in/*", "*://*.pinterest.co.kr/*", "*://*.pinterest.co.nz/*", "*://*.pinterest.co.uk/*", "*://*.pinterest.com.au/*", "*://*.pinterest.com.mx/*", "*://*.pinterest.com/*", "*://*.pinterest.cz/*", "*://*.pinterest.de/*", "*://*.pinterest.dk/*", "*://*.pinterest.es/*", "*://*.pinterest.fi/*", "*://*.pinterest.fr/*", "*://*.pinterest.ie/*", "*://*.pinterest.it/*", "*://*.pinterest.jp/*", "*://*.pinterest.nl/*", "*://*.pinterest.nz/*", "*://*.pinterest.pt/*", "*://*.pinterest.ru/*", "*://*.pinterest.se/*", "*://*.pinterest.cl/*", "*://*.pinterest.ph/*" ]
+   } ],
+   "description": "The Easiest Way to Sort Your Pinterest Pins Automatically!",
+   "icons": {
+      "128": "img/icon-128.png",
+      "16": "img/icon-16.png",
+      "196": "img/icon-196.png",
+      "32": "img/icon-32.png",
+      "96": "img/icon-96.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtXbaZd1BulSL5iSceHMVdi/g2Kz4jcC6jtVVu4YntB10tDYnb8dFsfmDaCsuaDAUeO3Py1Qh2nGb88UQS051+yk/iGGDL5oEW8MbVDC/HS+/11jZZNVmp5LKEfYjIrDji7gxxLLNGFnTrm70DzYOKhU96D17dLz6bJgNInNxXgLYrIhurkbVjG3p9hb4PWUYJYQiEduLuqoA5l6ntFdnq/7L/CHaUnmab3wWbXDbX0qf7fndKd85nukSxy+6cLq67GaT1G3CYpXW/FnyA723oAFop6b0qmFUX6DMETM0G949QP+j4er99hUrf1zGdttAsB1EAolUozSc8+X0Z8BxbwIDAQAB",
+   "manifest_version": 3,
+   "name": "Pinterest sort extension - SortPin.com",
+   "permissions": [ "storage", "unlimitedStorage" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.9.9",
+   "web_accessible_resources": [ {
+      "matches": [ "*://*.pinterest.at/*", "*://*.pinterest.ca/*", "*://*.pinterest.ch/*", "*://*.pinterest.cl/*", "*://*.pinterest.co.in/*", "*://*.pinterest.co.kr/*", "*://*.pinterest.co.nz/*", "*://*.pinterest.co.uk/*", "*://*.pinterest.com.au/*", "*://*.pinterest.com.mx/*", "*://*.pinterest.com/*", "*://*.pinterest.cz/*", "*://*.pinterest.de/*", "*://*.pinterest.dk/*", "*://*.pinterest.es/*", "*://*.pinterest.fi/*", "*://*.pinterest.fr/*", "*://*.pinterest.ie/*", "*://*.pinterest.it/*", "*://*.pinterest.jp/*", "*://*.pinterest.nl/*", "*://*.pinterest.nz/*", "*://*.pinterest.ph/*", "*://*.pinterest.pt/*", "*://*.pinterest.ru/*", "*://*.pinterest.se/*" ],
+      "resources": [ "*" ],
+      "use_dynamic_url": false
+   }, {
+      "matches": [ "*://*.pinterest.at/*", "*://*.pinterest.ca/*", "*://*.pinterest.ch/*", "*://*.pinterest.cl/*", "*://*.pinterest.co.in/*", "*://*.pinterest.co.kr/*", "*://*.pinterest.co.nz/*", "*://*.pinterest.co.uk/*", "*://*.pinterest.com.au/*", "*://*.pinterest.com.mx/*", "*://*.pinterest.com/*", "*://*.pinterest.cz/*", "*://*.pinterest.de/*", "*://*.pinterest.dk/*", "*://*.pinterest.es/*", "*://*.pinterest.fi/*", "*://*.pinterest.fr/*", "*://*.pinterest.ie/*", "*://*.pinterest.it/*", "*://*.pinterest.jp/*", "*://*.pinterest.nl/*", "*://*.pinterest.nz/*", "*://*.pinterest.ph/*", "*://*.pinterest.pt/*", "*://*.pinterest.ru/*", "*://*.pinterest.se/*" ],
+      "resources": [ "assets/chunk-c587a301.js", "assets/chunk-15a82b54.js", "assets/chunk-72d8b289.js", "assets/chunk-72196173.js", "assets/chunk-28200a5e.js", "assets/chunk-f8f52f07.js", "assets/chunk-4faeb8d9.js", "assets/chunk-2f7c72bb.js" ],
+      "use_dynamic_url": false
+   } ]
+}

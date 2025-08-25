@@ -2,3 +2,4 @@ requests
 python-dotenv
 beautifulsoup4
 PyQt6
+undetected-playwright

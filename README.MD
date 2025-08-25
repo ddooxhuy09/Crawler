@@ -15,8 +15,13 @@
 - Sử dụng YouTube Data API v3
 - Hỗ trợ rotation API keys từ file `api.json`
 - Tự động chuyển API key khi gặp lỗi
-- Thu thập thông tin: video details, statistics, channel info
+- Thu thập thông tin: video details, statistics, channel info, thumbnail_url
 - Lưu dữ liệu vào file CSV với tên động
+
+### Pinterest Crawler
+- Mở trang tìm kiếm Pinterest theo keyword
+- Bắt các API `PinResource/get` từ Network
+- Trích xuất thông tin pin và lưu vào CSV: pin_url, canonical_pin_id, title, description, image_url, created_at, share_count, repin_count, comment_count, reaction_count, tracked_link, pinner_username, pinner_full_name, board_name, board_url, link, hashtags
 
 ### Temu Crawler
 - Sử dụng undetected-playwright để tránh bị detect
@@ -41,7 +46,7 @@
 
 ### GUI Application
 - Giao diện PyQt6 thân thiện
-- Chọn mode crawl (TikTok/YouTube/Temu/AliExpress/Instagram)
+- Chọn mode crawl (TikTok/YouTube/Temu/AliExpress/Instagram/Pinterest)
 - Nhập keyword tìm kiếm
 - Chọn vị trí lưu file
 - Theo dõi tiến trình crawl
@@ -109,6 +114,7 @@ python main.py
 ├── main.py              # GUI application chính
 ├── crawl_tiktok.py      # TikTok crawler
 ├── crawl_youtube.py     # YouTube crawler  
+├── crawl_pinterest.py   # Pinterest crawler
 ├── crawl_temu.py        # Temu crawler
 ├── crawl_aliexpress.py  # AliExpress crawler
 ├── crawl_instagram.py   # Instagram crawler
@@ -130,6 +136,10 @@ python main.py
 ### YouTube CSV  
 - `youtube_videos_{keyword}.csv`
 - Cột: video_id, title, description, channel_title, published_at, thumbnail_url, view_count, like_count, comment_count, url
+
+### Pinterest CSV
+- `pinterest_pins_{keyword}.csv`
+- Cột: pin_url, canonical_pin_id, title, description, image_url, created_at, share_count, repin_count, comment_count, reaction_count, tracked_link, pinner_username, pinner_full_name, board_name, board_url, link, hashtags
 
 ### Temu CSV
 - `products_temu.csv`

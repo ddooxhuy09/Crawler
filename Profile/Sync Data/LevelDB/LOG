@@ -1,0 +1,6 @@
+2025/08/24-23:27:25.628 48ac Reusing MANIFEST C:\Users\ddoox\AppData\Local\Google\Chrome\User Data\Profile 3\Sync Data\LevelDB/MANIFEST-000001
+2025/08/24-23:27:25.628 48ac Recovering log #3
+2025/08/24-23:27:25.631 48ac Reusing old log C:\Users\ddoox\AppData\Local\Google\Chrome\User Data\Profile 3\Sync Data\LevelDB/000003.log 
+2025/08/24-23:27:50.791 3b70 Level-0 table #5: started
+2025/08/24-23:27:50.793 3b70 Level-0 table #5: 135089 bytes OK
+2025/08/24-23:27:50.794 3b70 Delete type=0 #3
